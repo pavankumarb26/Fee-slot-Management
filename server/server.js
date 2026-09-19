@@ -20,7 +20,10 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: [
+    "http://localhost:5173",
+    "https://fee-slot-management.vercel.app"
+  ],
     methods: ['GET', 'POST'],
     credentials: true
   }

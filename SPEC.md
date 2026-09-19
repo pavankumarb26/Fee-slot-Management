@@ -482,6 +482,6 @@ COLLEGE_AUTH_URL=https://college-website.edu/api/auth
 
 ### Client (.env)
 ```
-VITE_API_URL=http://localhost:5000/api
-VITE_SOCKET_URL=http://localhost:5000
+VITE_API_URL=https://fee-slot-management.onrender.com/api
+VITE_SOCKET_URL=https://fee-slot-management.onrender.com
 ```
