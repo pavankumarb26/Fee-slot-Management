@@ -18,12 +18,31 @@ dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
+
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://fee-slot-management.vercel.app'
+];
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  const customOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map(url => url.trim()).filter(Boolean)
+    : [];
+  const allowed = [...defaultOrigins, ...customOrigins];
+  return allowed.includes(origin) || /\.vercel\.app$/.test(origin);
+};
+
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-    "http://localhost:5173",
-    "https://fee-slot-management.vercel.app"
-  ],
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -31,7 +50,13 @@ const io = new Server(httpServer, {
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -59,7 +84,11 @@ const PORT = process.env.PORT || 5000;
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fee-booking');
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/fee-booking';
+    if (!process.env.MONGODB_URI) {
+      console.warn('Warning: MONGODB_URI is not defined in environment variables. Falling back to local MongoDB.');
+    }
+    await mongoose.connect(uri);
     console.log('MongoDB connected successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error.message);
@@ -72,8 +101,8 @@ const startServer = async () => {
   setupSocket(io);
   startCronJobs();
   
-  httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  httpServer.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT}`);
   });
 };
 

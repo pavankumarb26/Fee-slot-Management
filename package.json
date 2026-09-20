@@ -1,0 +1,12 @@
+{
+  "name": "fee-slot-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "College Fee Counter Appointment Booking System",
+  "scripts": {
+    "build:client": "cd client && npm install && npm run build",
+    "start:server": "cd server && npm start",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev"
+  }
+}
