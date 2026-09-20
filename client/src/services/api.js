@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+const rawApiUrl = import.meta.env.VITE_API_URL || 'https://fee-slot-management.onrender.com/api';
+const cleanApiUrl = rawApiUrl.replace(/\/+$/, '');
+const baseURL = cleanApiUrl.endsWith('/api') ? cleanApiUrl : `${cleanApiUrl}/api`;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://fee-slot-management.onrender.com/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
