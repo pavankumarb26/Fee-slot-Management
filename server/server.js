@@ -19,51 +19,29 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-const defaultOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://fee-slot-management.vercel.app'
-];
-
-const isOriginAllowed = (origin) => {
-  if (!origin) return true;
-  const customOrigins = process.env.CLIENT_URL
-    ? process.env.CLIENT_URL.split(',').map(url => url.trim()).filter(Boolean)
-    : [];
-  const allowed = [...defaultOrigins, ...customOrigins];
-  return allowed.includes(origin) || /\.vercel\.app$/.test(origin);
+// Dynamic CORS configuration allowing request origin reflection
+const corsOptions = {
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
 const io = new Server(httpServer, {
-  cors: {
-    origin: (origin, callback) => {
-      if (isOriginAllowed(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, true);
-      }
-    },
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
+  cors: corsOptions
 });
 
-app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    if (isOriginAllowed(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, true);
-    }
-  },
-  credentials: true
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(express.json());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 2000, // Increased limit for local development/testing
+  max: 2000,
   message: { error: 'Too many requests, please try again later.' }
 });
 app.use('/api', limiter);
@@ -102,7 +80,7 @@ const startServer = async () => {
   startCronJobs();
   
   httpServer.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
 };
 
